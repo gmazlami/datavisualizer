@@ -1,8 +1,12 @@
 from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS  # Import CORS
 import os
 import pandas as pd
 
 app = Flask(__name__)
+
+# Enable CORS for all origins
+CORS(app)  # This will disable CORS checks for all origins
 
 # Directory to store uploaded files
 UPLOAD_FOLDER = 'uploads'
