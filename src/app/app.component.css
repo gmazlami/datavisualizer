@@ -1,0 +1,32 @@
+/* Basic Styling for App Component */
+.container {
+    width: 80%;
+    margin: 0 auto;
+  }
+  
+  header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  section {
+    margin: 20px 0;
+  }
+  
+  footer {
+    text-align: center;
+    margin-top: 40px;
+    padding: 10px 0;
+    background-color: #eee;
+  }
+  
+  h1 {
+    font-size: 2.5em;
+    color: #4e4e4e;
+  }
+  
+  h2 {
+    font-size: 1.8em;
+    color: #343434;
+  }
+  

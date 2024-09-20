@@ -1,13 +1,15 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { VisualizationComponent } from './visualization/visualization.component';
+import { UploadComponent } from './upload/upload.component';
+import { LoadDataComponent } from './load-data/load-data.component';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css'],
+  standalone: true,
+  imports: [VisualizationComponent, UploadComponent, LoadDataComponent]
 })
 export class AppComponent {
-  title = 'datavisualizer';
+  title = 'Real Estate Data Visualization';
 }

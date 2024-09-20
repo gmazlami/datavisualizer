@@ -1,0 +1,5 @@
+<div>
+    <button *ngFor="let file of files" (click)="loadData(file)">{{ file }}</button>
+  </div>
+  <app-visualization [data]="data"></app-visualization>
+  
