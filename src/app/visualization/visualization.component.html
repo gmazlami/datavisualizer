@@ -1,1 +1,17 @@
-{{downloadedFileContent}}
+<div style="display: block;">
+    <ngx-charts-bar-vertical
+      [view]="[700, 400]"
+      [scheme]="colorScheme"
+      [results]="chartData"
+      [gradient]="false"
+      [xAxis]="true"
+      [yAxis]="true"
+      [legend]="false"
+      [showXAxisLabel]="true"
+      [showYAxisLabel]="true"
+      [xAxisLabel]="xAxisLabel"
+      [yAxisLabel]="yAxisLabel"
+      [yScaleMin]="yScaleMin"
+      [yScaleMax]="yScaleMax">
+    </ngx-charts-bar-vertical>
+  </div>
