@@ -1,41 +1,73 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
-import { DataService } from '../data.service';
-
+import { DataService } from '../data.service';  // Assume this downloads data from somewhere
+import { FormsModule } from '@angular/forms';  // Import FormsModule for ngModel
+import { CsvDataService, TableDataError, CacheNotFoundError } from '../csv-data.service'; // Our enhanced data service
 
 @Component({
   selector: 'app-visualization',
   templateUrl: './visualization.component.html',
   styleUrls: ['./visualization.component.css'],
   standalone: true,
-  imports: [NgxChartsModule]
+  imports: [NgxChartsModule, FormsModule]
 })
-export class VisualizationComponent {
-  @Input() fileName: string = '';
+export class VisualizationComponent implements OnChanges, OnInit {
+  @Input() fileName: string = ''; // File to load
   chartData: any[] = [];
-  colorScheme = 'cool';
-  downloadedFileContent = {}
-  yAxisLabel = 'Value';
-  xAxisLabel = 'Year';
-  yScaleMin: number = 0;
+  colorScheme = 'cool'; // Color scheme for the chart
+  downloadedFileContent: any = {}; // Content of the file
+  yAxisLabel = 'Value'; // Default labels for axes
+  xAxisLabel = 'Category';
+  yScaleMin: number = 0; // Default scale for the Y-axis
   yScaleMax: number = 0;
+  tableKey: string | null = null; // Key to refer to the cached table
+  headers: string[] = []; // Store table headers for user selection
+  selectedXAxis: string = ''; // User-selected X-axis
+  selectedYAxis: string = ''; // User-selected Y-axis
+  errorMessage: string = ''; // Store error messages for the user
 
-  constructor(private dataService: DataService) {}
+  constructor(private dataService: DataService, private csvDataService: CsvDataService) { }
+
+  ngOnInit() {
+    console.log("Visualization initialized");
+    this.errorMessage = '';
+    if (this.fileName) {
+      this.loadFile(this.fileName);
+    }
+  }
 
   ngOnChanges() {
-    console.log(this.fileName);
+    console.log("Visualization updated");
+    if (this.fileName) {
+      this.loadFile(this.fileName);
+    }
+  }
 
-    this.dataService.downloadFile(this.fileName).subscribe({
+  // Load the file and handle CSV parsing and caching
+  loadFile(fileName: string) {
+    this.errorMessage = ''; // Clear previous errors
+    this.dataService.downloadFile(fileName).subscribe({
       next: (content) => {
-        console.log(content);
-        this.downloadedFileContent = content.data;
-        this.parseCSV(content.data);
-        console.log('File content downloaded:', this.downloadedFileContent); // Optional: Log the content
+        try {
+          this.downloadedFileContent = content.data;
+          const { headers, tableData } = this.parseCSV(content.data);
+          this.tableKey = this.csvDataService.addTableToCache(tableData);
+          if (!this.tableKey) {
+            throw new TableDataError('Failed to add table to cache');
+          }
+          this.headers = this.csvDataService.getTableHeaders(this.tableKey) || [];
+        } catch (error) {
+          this.handleError(error);
+        }
+      },
+      error: (err) => {
+        this.errorMessage = 'Error downloading file: ' + err.message;
       }
     });
   }
 
-  parseCSV(csvData: string) {
+  // Simple CSV parser function
+  parseCSV(csvData: string): { headers: string[], tableData: any[] } {
     const rows = csvData.split('\n');
     const headers = rows[0].split(';');
     const tableData = rows.slice(1).map(row => {
@@ -45,61 +77,46 @@ export class VisualizationComponent {
         return obj;
       }, {} as { [key: string]: string });
     });
-
-    // Assuming the first column is the x-axis and the last column is the y-axis
-    const xAxisLabel = headers[1];
-    const yAxisLabel = headers[headers.length - 1];
-    this.xAxisLabel = xAxisLabel;
-    this.yAxisLabel = yAxisLabel;
-
-    const aggregatedData = this.aggregateData(tableData, xAxisLabel, yAxisLabel);
-    const { yScaleMin, yScaleMax } = this.calculateAverages(aggregatedData);
-
-    this.yScaleMin = yScaleMin;
-    this.yScaleMax = yScaleMax;
-
-    console.log('Aggregated Data:', aggregatedData);
-    console.log('yScaleMin:', this.yScaleMin, 'yScaleMax:', this.yScaleMax);
+    return { headers, tableData };
   }
 
-  private aggregateData(tableData: { [key: string]: string }[], xAxisLabel: string, yAxisLabel: string): Map<string, { sum: number, count: number }> {
-    const aggregatedData = new Map<string, { sum: number, count: number }>();
-    tableData.forEach(row => {
-      let key = row[xAxisLabel];
-      let value = +row[yAxisLabel];
-      if (isNaN(value)) {
-        value = 0;
-      }
-      if (!key) {
-        key = 'Unknown';
-      }
-      if (aggregatedData.has(key)) {
-        const data = aggregatedData.get(key)!;
-        data.sum += value;
-        data.count += 1;
+  onHeaderSelect() {
+    if (!this.tableKey || !this.selectedXAxis || !this.selectedYAxis) {
+      this.errorMessage = 'Please select both X and Y axis headers.';
+      return;
+    }
+    try {
+      const stats = this.csvDataService.getColumnStatistics(this.tableKey, this.selectedXAxis, this.selectedYAxis);
+      const aggregatedData = this.csvDataService.aggregateTableData(this.tableKey, this.selectedXAxis, this.selectedYAxis);
+
+      if (stats && aggregatedData) {  // Null check for stats and aggregatedData
+        // Construct chart data using aggregated averages
+        this.chartData = Array.from(aggregatedData, ([name, { sum, count }]) => ({
+          name,
+          value: count > 0 ? sum / count : 0
+        }));
+
+        // Set yScaleMin and yScaleMax using the min and maxAverage from the statistics
+        this.yScaleMin = stats.min;
+        console.log(stats.max);
+        console.log(stats.maxAverage);
+        this.yScaleMax = stats.maxAverage;
+
+        this.errorMessage = ''; // Clear any previous errors
       } else {
-        aggregatedData.set(key, { sum: value, count: 1 });
+        this.errorMessage = 'Error calculating statistics or aggregating data.';
       }
-    });
-    return aggregatedData;
+    } catch (error) {
+      this.handleError(error);
+    }
   }
 
-  private calculateAverages(aggregatedData: Map<string, { sum: number, count: number }>): { yScaleMin: number, yScaleMax: number } {
-    // Calculate averages and transform aggregatedData into an array of objects for chartData
-    this.chartData = Array.from(aggregatedData, ([name, { sum, count }]) => ({
-      name,
-      value: count > 0 ? sum / count : 0 // Ensure no division by zero
-    }));
-
-    // Calculate yScaleMin and yScaleMax
-    const values = this.chartData.map(data => data.value);
-    const yScaleMin = Math.min(...values);
-    const yScaleMax = Math.max(...values);
-
-    // Log chartData to verify its format
-    console.log('Chart Data:', this.chartData);
-    console.log('yScaleMin:', yScaleMin, 'yScaleMax:', yScaleMax);
-
-    return { yScaleMin, yScaleMax };
+  // Centralized error handling function
+  handleError(error: any) {
+    if (error instanceof TableDataError || error instanceof CacheNotFoundError) {
+      this.errorMessage = error.message;
+    } else {
+      this.errorMessage = 'Unexpected error occurred: ' + error;
+    }
   }
 }
