@@ -1,1 +1,32 @@
-{{downloadedFileContent}}
+<!-- Error Message Display -->
+<div *ngIf="errorMessage" class="error-message">
+  <p>{{ errorMessage }}</p>
+</div>
+
+<!-- Header Selection UI -->
+<div *ngIf="headers.length > 0">
+  <div class="header-select">
+    <label for="xAxis">Select the Mighty X-Axis (Your Path to Enlightenment):</label>
+    <select [(ngModel)]="selectedXAxis" (change)="onHeaderSelect()" class="axis-select">
+      <option *ngFor="let header of headers" [value]="header">{{ header }}</option>
+    </select>
+  </div>
+
+  <div class="header-select">
+    <label for="yAxis">Select the Grand Y-Axis (The Measure of Your Treasures):</label>
+    <select [(ngModel)]="selectedYAxis" (change)="onHeaderSelect()" class="axis-select">
+      <option *ngFor="let header of headers" [value]="header">{{ header }}</option>
+    </select>
+  </div>
+</div>
+
+<!-- Chart Display -->
+<ngx-charts-bar-vertical *ngIf="chartData.length > 0" [results]="chartData" [xAxis]="true" [yAxis]="true"
+  [xAxisLabel]="xAxisLabel" [yAxisLabel]="yAxisLabel" [scheme]="colorScheme" [yScaleMin]="yScaleMin"
+  [yScaleMax]="yScaleMax" [showXAxisLabel]="true" [showYAxisLabel]="true" [barPadding]="8" [roundEdges]="true">
+</ngx-charts-bar-vertical>
+
+<!-- No Data Message -->
+<div *ngIf="chartData.length === 0 && !errorMessage" class="no-data-message">
+  <p>No data to display. The winds of data await your command! Select headers above to unleash the insights!</p>
+</div>
