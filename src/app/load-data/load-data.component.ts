@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { UploadedFiles } from '../filelist'
 import { VisualizationComponent } from '../visualization/visualization.component';
 import { CommonModule, NgFor } from '@angular/common';
 import { DataService } from '../data.service';
@@ -14,6 +14,7 @@ import { DataService } from '../data.service';
 export class LoadDataComponent implements OnInit {
   files: string[] = [];
   data: any[] = [];
+  selectedFile: string = '';
 
   constructor(private dataService: DataService) {}
 
@@ -22,12 +23,14 @@ export class LoadDataComponent implements OnInit {
   }
 
   loadFiles(): void {
-    this.dataService.listFiles().subscribe((fileList: FileList) => {
-      console.log(fileList);
+    this.dataService.listFiles().subscribe((fileList: UploadedFiles) => {
+      this.files = fileList.files;
     });
   }
 
   onFileClick(index: number): void {
+    console.log(this.files[index]);
+    this.selectedFile = this.files[index];
     // Navigate to the index page when a file is clicked
     //this.router.navigate(['/']);
 

@@ -56,7 +56,13 @@ def download_file(filename):
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     
     if os.path.exists(filepath):
-        return send_file(filepath, as_attachment=True)
+        try:
+            with open(filepath, 'r') as file:
+                content = file.read()
+            # Return the file content inside the 'data' property of the JSON response
+            return jsonify({"data": content}), 200
+        except Exception as e:
+            return jsonify({"error": f"Could not read file: {str(e)}"}), 500
     else:
         return jsonify({"error": "File not found"}), 404
     

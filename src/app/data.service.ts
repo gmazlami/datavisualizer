@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { HttpClientModule } from '@angular/common/http'; // Import here
+
+
 
 import { Observable } from 'rxjs';
+import { UploadedFiles } from './filelist';
 
 @Injectable({
   providedIn: 'root'
@@ -15,17 +17,17 @@ export class DataService {
 
 
   uploadFile(formData: FormData): Observable<any> {
-    return this.http.post('/api/upload', formData);
+    return this.http.post(`${this.baseUrl}/upload`, formData);
   }
 
   loadFiles(): Observable<string[]> {
-    return this.http.get<string[]>('/api/load-files');
+    return this.http.get<string[]>(`${this.baseUrl}load-files`);
   }
-  listFiles(): Observable<FileList> {
-    return this.http.get<FileList>(`${this.baseUrl}/files`);
+  listFiles(): Observable<UploadedFiles> {
+    return this.http.get<UploadedFiles>(`${this.baseUrl}/files`);
   }
 
-  loadVisualization(filename: string): Observable<any[]> {
-    return this.http.get<any[]>(`/api/visualize/${filename}`);
+  downloadFile(filename: string): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/download-file/${filename}`);
   }
 }

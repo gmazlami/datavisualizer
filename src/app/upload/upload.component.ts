@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { HttpClientModule } from '@angular/common/http';
+import { DataService } from '../data.service';
 
 
 @Component({
@@ -13,7 +14,7 @@ import { HttpClientModule } from '@angular/common/http';
 export class UploadComponent {
   selectedFile: File | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private dataService: DataService) {}
 
   onFileChange(event: any) {
     this.selectedFile = event.target.files[0];
@@ -23,8 +24,8 @@ export class UploadComponent {
     const formData = new FormData();
     if (this.selectedFile) {
       formData.append('file', this.selectedFile);
-      this.http.post('/api/upload', formData).subscribe(response => {
-        console.log('File uploaded successfully', response);
+      this.dataService.uploadFile(formData).subscribe(response => {
+        console.log(response);
       });
     }
   }

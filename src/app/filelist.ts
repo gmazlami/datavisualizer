@@ -1,4 +1,4 @@
-export interface FileList {
+export interface UploadedFiles {
     files: string[];
   }
   
