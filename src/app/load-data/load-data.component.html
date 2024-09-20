@@ -1,5 +1,8 @@
-<div>
-    <button *ngFor="let file of files" (click)="loadData(file)">{{ file }}</button>
-  </div>
-  <app-visualization [data]="data"></app-visualization>
-  
+<div class="load-data">
+  <h2>Loaded Files</h2>
+  <ul>
+    <li *ngFor="let file of files; let i = index" (click)="onFileClick(i)" style="cursor: pointer;">
+      {{ file }}
+    </li>
+  </ul>
+</div>

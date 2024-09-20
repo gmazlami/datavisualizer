@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { VisualizationComponent } from '../visualization/visualization.component';
 import { CommonModule, NgFor } from '@angular/common';
+import { DataService } from '../data.service';
 
 @Component({
   selector: 'app-load-data',
@@ -14,17 +15,24 @@ export class LoadDataComponent implements OnInit {
   files: string[] = [];
   data: any[] = [];
 
-  constructor(private http: HttpClient) {}
+  constructor(private dataService: DataService) {}
 
-  ngOnInit() {
-    this.http.get<string[]>('/api/load-files').subscribe(files => {
-      this.files = files;
+  ngOnInit(): void {
+    this.loadFiles();
+  }
+
+  loadFiles(): void {
+    this.dataService.listFiles().subscribe((fileList: FileList) => {
+      console.log(fileList);
     });
   }
 
-  loadData(filename: string) {
-    this.http.get<any[]>(`/api/visualize/${filename}`).subscribe(data => {
-      this.data = data;
-    });
+  onFileClick(index: number): void {
+    // Navigate to the index page when a file is clicked
+    //this.router.navigate(['/']);
+
   }
+
+
+  
 }

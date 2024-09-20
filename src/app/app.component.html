@@ -8,48 +8,16 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav">
         <li class="nav-item active">
-          <a class="nav-link" href="#">Home</a>
+          <a class="nav-link" routerLink="/">Home</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Data History</a>
+          <a class="nav-link" routerLink="/data-history">Data History</a>
         </li>
       </ul>
     </div>
   </nav>
+  <router-outlet></router-outlet>
 
-  <header class="text-center mb-4">
-    <h1 class="display-4">{{ title }}</h1>
-  </header>
-
-  <!-- Upload CSV File Section -->
-  <section class="upload-section mb-5">
-    <h2 class="h3 text-primary">Upload CSV File</h2>
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <app-upload></app-upload>
-      </div>
-    </div>
-  </section>
-
-  <!-- Load Saved Data Section -->
-  <section class="load-section mb-5">
-    <h2 class="h3 text-primary">Load Saved Data</h2>
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <app-load-data></app-load-data>
-      </div>
-    </div>
-  </section>
-
-  <!-- Visualization Section -->
-  <section class="visualization-section mb-5">
-    <h2 class="h3 text-primary">Data Visualization</h2>
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <app-visualization></app-visualization>
-      </div>
-    </div>
-  </section>
 
   <!-- Footer -->
   <footer class="text-center mt-5">
