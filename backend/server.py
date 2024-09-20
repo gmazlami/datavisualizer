@@ -4,9 +4,10 @@ import os
 import pandas as pd
 
 app = Flask(__name__)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Enable CORS for all origins
-CORS(app)  # This will disable CORS checks for all origins
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Directory to store uploaded files
 UPLOAD_FOLDER = 'uploads'
@@ -16,10 +17,12 @@ if not os.path.exists(UPLOAD_FOLDER):
 # Route to upload CSV
 @app.route('/api/upload', methods=['POST'])
 def upload_file():
+    print(request)
     if 'file' not in request.files:
         return jsonify({"error": "No file part in the request"}), 400
     
     file = request.files['file']
+    print(file)
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
 
