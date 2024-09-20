@@ -11,5 +11,5 @@ import { LoadDataComponent } from './load-data/load-data.component';
   imports: [VisualizationComponent, UploadComponent, LoadDataComponent]
 })
 export class AppComponent {
-  title = 'Real Estate Data Visualization';
+  title = 'Smart(-ish) Data Visualization';
 }
